@@ -1,3 +1,22 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { LayoutShell } from '@core/layout/layout-shell';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: LayoutShell,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'users',
+      },
+      {
+        path: 'users',
+        loadChildren: () =>
+          import('./features/users/users.routes').then((m) => m.USERS_ROUTES),
+      },
+    ],
+  },
+];
