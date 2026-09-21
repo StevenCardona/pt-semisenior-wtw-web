@@ -1,0 +1,5 @@
+/* Estilos del root; el diseño global vive en styles.css (Tailwind). */
+:host {
+  display: block;
+  min-height: 100dvh;
+}
