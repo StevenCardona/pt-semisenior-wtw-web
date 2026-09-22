@@ -1,4 +1,3 @@
-/** Roles de usuario alineados con el enum camelCase de la API. */
 export const USER_ROLES = {
   Admin: 'admin',
   User: 'user',
@@ -14,8 +13,3 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 export function roleLabel(rol: string): string {
   return ROLE_LABELS[rol as UserRole] ?? 'User';
 }
-
-export const API_PATHS = {
-  users: 'users',
-  tasks: 'tasks',
-} as const;

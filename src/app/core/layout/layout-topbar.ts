@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
+import { LucideMenu } from '@lucide/angular';
 import { filter, map } from 'rxjs';
 
 import { UserMenu, UserMenuItem } from '@core/layout/menu/user-menu';
+import { APP_NAME } from '@shared/constants/app-name.constants';
 import { CURRENT_USER } from '@shared/constants/current-user';
 import { getInitials } from '@shared/utils/string.utils';
 
@@ -12,14 +14,14 @@ type Breadcrumb = {
 };
 
 const DEFAULT_CRUMBS: Breadcrumb[] = [
-  { label: 'TaskFlow' },
+  { label: APP_NAME },
   { label: 'Operaciones' },
 ];
 
 @Component({
   selector: 'app-layout-topbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UserMenu],
+  imports: [UserMenu, LucideMenu],
   host: {
     class:
       'flex h-14 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 lg:px-6',
@@ -32,17 +34,7 @@ const DEFAULT_CRUMBS: Breadcrumb[] = [
         aria-label="Abrir menú de navegación"
         (click)="menuToggle.emit()"
       >
-        <svg
-          class="size-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          <path d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        <svg lucideMenu [size]="20" class="size-5"></svg>
       </button>
 
       <nav class="min-w-0 text-sm" aria-label="Breadcrumb">
@@ -98,6 +90,6 @@ export class LayoutTopbar {
     }
 
     const label = route.snapshot?.title || 'Operaciones';
-    return [{ label: 'TaskFlow' }, { label }];
+    return [{ label: APP_NAME }, { label }];
   }
 }

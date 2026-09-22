@@ -1,35 +1,22 @@
-# WTW Task Manager — Frontend (Angular)
+# WTW Task Manager — Frontend
 
-Frontend de la prueba técnica: sistema interno de gestión de tareas asociado a colaboradores.
+App web de la prueba técnica: **WtWTaskManager**, un panel interno para gestionar tareas y colaboradores.
 
-Repositorio: aplicación Angular standalone que consume la API REST del backend (.NET + SQL Server).
-
----
-
-## Alcance actual
-
-En esta fase del frontend **solo** está montado lo siguiente:
-
-- Arquitectura `core` / `shared` / `features`
-- Ambientes de desarrollo y producción
-- Interceptor de errores HTTP básico + `ToastService` simple (sin UI de toast aún)
-- Feature **Users**: modelos, `UsersApiService` y ruta lazy
-- Tailwind CSS v4 configurado
-- README orientado al revisor
-
-**Sin UI de negocio** todavía: no hay formularios, tablas, store ni pantallas funcionales de usuarios/tareas.
+Stack: **Angular 21** (standalone), **Tailwind CSS v4** y **Lucide** para iconos. Habla con la API .NET del repo `wtw-task-manager-apis`.
 
 ---
 
-## Cómo ejecutar el proyecto
+## Antes de empezar
 
-### Requisitos
+Necesitas:
 
-1. [Node.js](https://nodejs.org/) (LTS recomendado, v20+)
-2. npm (viene con Node)
-3. La API del backend corriendo en `http://localhost:5065` (ver README del repo de APIs)
+1. [Node.js](https://nodejs.org/) LTS (v20 o superior) y npm
+2. La **API del backend** corriendo en `http://localhost:5065`  
+   (sigue el README de `wtw-task-manager-apis`)
 
-### Pasos
+---
+
+## Cómo levantarlo
 
 ```powershell
 cd wtw-prueba-tecnica-web\wtw-task-manager-ui
@@ -37,15 +24,15 @@ npm install
 npm start
 ```
 
-La app queda en **http://localhost:4200**.
+Abre **http://localhost:4200**.
 
-`npm start` usa la configuración de **development**, que apunta a:
+En desarrollo la app apunta a:
 
 ```text
 http://localhost:5065/api
 ```
 
-CORS del backend ya permite origen `http://localhost:4200`.
+El backend ya tiene CORS para `http://localhost:4200`.
 
 ### Build de producción
 
@@ -53,83 +40,115 @@ CORS del backend ya permite origen `http://localhost:4200`.
 npm run build
 ```
 
-Usa `environment.ts` (producción). Ajusta `apiUrl` antes de desplegar.
+Usa `environment.ts`. Antes de desplegar, ajusta `apiUrl` a la URL real de la API.
 
 ---
 
-## Arquitectura
+## Cómo está compuesto el proyecto
+
+La app vive en `src/app/` y se separa en tres zonas:
 
 ```text
 src/app/
-  core/                 # Esqueleto de la app (una sola vez)
-    layout/             # Shell con router-outlet
-    interceptors/       # Errores HTTP → ToastService
+  core/                 # Cosas de una sola vez (esqueleto)
+    layout/             # Sidebar, topbar, shell + router-outlet
+    interceptors/       # Errores HTTP → toast
     services/           # ToastService
-  shared/               # Reutilizable, sin dominio de negocio
+    components/         # Toast en pantalla
+  shared/               # Piezas reutilizables (sin dominio)
+    components/         # PageHeader, logo, sidebar-credit, badges…
+    constants/          # APP_NAME, nav, roles, estados, API paths
     models/             # ApiResponse<T>
-    constants/          # roles, paths de API
+    table-skeleton/     # Loading / fila vacía
+    utils/
   features/
-    users/              # Dominio usuarios
-      models/
-      services/         # UsersApiService (HttpClient + baseUrl)
-      pages/            # Smart page (placeholder, sin UI)
-      users.routes.ts
+    users/              # Módulo Usuarios
+    tasks/              # Módulo Tareas
+  app.routes.ts         # Rutas lazy: /tasks (inicio) y /users
 ```
 
-### ¿Dónde va cada cosa?
-
-| Ubicación | Criterio |
-|-----------|----------|
-| `core` | ¿Es esqueleto de la app? (layout, interceptor, toasts) |
-| `shared` | ¿Lo usan 2+ features y no es de un dominio? |
-| `features/X` | ¿Pertenece al dominio de negocio X? |
-
-**No hay autenticación** en esta fase (ni login, ni guards, ni AuthStore).
-
-### Flujo de datos (Users)
+Cada feature sigue el mismo patrón:
 
 ```text
-UsersPage (smart, futuro) → UsersApiService (HttpClient) → API
-                                      ↑
-                       errorInterceptor → ToastService
+features/<nombre>/
+  pages/          # Pantalla “smart” (carga datos, abre modales)
+  components/     # Tabla, formulario, modal…
+  models/         # Tipos TypeScript alineados a la API
+  services/       # XxxApiService (HttpClient)
+  <nombre>.routes.ts
 ```
 
----
+### ¿Dónde pongo código nuevo?
 
-## Decisiones técnicas
+| Carpeta | Pregunta rápida |
+|---------|-----------------|
+| `core` | ¿Es parte del esqueleto de la app? |
+| `shared` | ¿Lo usan (o podrían usar) varios features y no es de un solo dominio? |
+| `features/X` | ¿Es lógica o UI de ese dominio (users / tasks)? |
 
-1. **Angular 21 standalone** con rutas lazy por feature (`loadChildren`).
-2. **Separación core / shared / features** para mantener responsabilidades claras.
-3. **`inject()`** en lugar de inyección por constructor.
-4. **Servicio por feature** con `HttpClient` y `baseUrl` fija (`environment.apiUrl` + `API_PATHS`), sin cliente HTTP genérico ni store todavía.
-5. **Interceptor + toast básicos** para mostrar el primer mensaje de error de la API.
-6. **Ambientes** con `fileReplacements`: development → `localhost:5065`; production → placeholder documentado.
-7. **Contratos alineados a la API**: camelCase (`mail`, `rol`, `createdBy`) y roles `admin` | `user`.
-8. **Tailwind CSS v4** vía PostCSS (`@import 'tailwindcss'` + `@theme` mínimo).
-9. **Sin auth** por ahora; el campo `createdBy` del DTO de creación queda para cuando exista UI.
+No hay login ni guards: el usuario actual es un demo fijo (`CURRENT_USER`) que se usa en `createdBy` / `updatedBy`.
 
 ---
 
-## Funcionalidades pendientes
+## Qué puedes hacer en la app
 
-- UI de usuarios (listado y creación con formulario reactivo)
-- Estado local / store del feature cuando haga falta
-- Feature completo de **tareas** (crear, listar, filtrar por estado, cambiar estado)
-- Selección de usuario al asignar tareas
-- Componentes presentacionales compartidos (tabla, modal, campos de formulario)
-- Visualización de toasts en pantalla
-- Autenticación / autorización (si se requiere más adelante)
-- Layout visual (header, sidebar, navegación)
+### Usuarios (`/users`)
+
+- Ver el listado de colaboradores
+- Crear un usuario nuevo (nombre + correo)
+
+### Tareas (`/tasks` — ruta de inicio)
+
+- Ver el listado con asignado, estado y fechas
+- Filtrar por usuario, estado y orden; los filtros van en la **URL** (`userId`, `status`, `orderBy`) para que al recargar se mantengan
+- Crear una tarea y asignarla con el selector de usuarios
+- Avanzar el estado: **Iniciar** (`pending` → `inProgress`) o **Completada** (`inProgress` → `done`)
+
+Estados que ve el usuario: Pendiente, En progreso, Completada (la API sigue usando `pending` / `inProgress` / `done`).
 
 ---
 
-## Endpoints que consume el feature Users
+## Flujo de datos
 
-Base (dev): `http://localhost:5065/api`
+```text
+Page (signals)
+  → XxxApiService (HttpClient)
+      → API REST
+  ↑
+errorInterceptor → ToastService → toast en pantalla
+```
+
+Las páginas cargan datos, pasan listas a tablas presentacionales y abren modales para crear. Los errores de la API se muestran con el toast; los éxitos (crear / cambiar estado) también.
+
+---
+
+## Endpoints que consume
+
+Base en desarrollo: `http://localhost:5065/api`
+
+### Usuarios
 
 | Método | Ruta | Uso |
 |--------|------|-----|
-| `GET` | `/users` | Listar usuarios |
-| `POST` | `/users` | Crear usuario |
+| `GET` | `/users` | Listar |
+| `POST` | `/users` | Crear (`name`, `mail`, `rol`, `createdBy`) |
 
-El cuerpo de creación esperado por la API incluye `name`, `mail`, `rol` y `createdBy`.
+### Tareas
+
+| Método | Ruta | Uso |
+|--------|------|-----|
+| `GET` | `/tasks?orderBy=` | Listar todas |
+| `GET` | `/tasks/user/{userId}?status=&orderBy=` | Listar por usuario (filtro de estado opcional) |
+| `POST` | `/tasks` | Crear (`name`, `description?`, `userId`, `createdBy`) |
+| `PUT` | `/tasks/{id}/status` | Cambiar estado (`status`, `updatedBy`) |
+
+Las respuestas de tarea incluyen el asignado como objeto `assignedTo` (`id`, `name`, `mail`, `rol`), no solo un `userId`.
+
+---
+
+## Notas útiles
+
+- **Sin autenticación** en esta fase: cualquiera que llegue a la API/UI puede operar; `CURRENT_USER` simula al actor.
+- **Iconos**: `@lucide/angular` (reemplazan los SVG sueltos del layout y acciones).
+- **Estilos**: Tailwind v4 con PostCSS (`@import 'tailwindcss'`).
+- **Contratos**: camelCase alineado a la API (`mail`, `rol`, `createdBy`, `assignedTo`, etc.).

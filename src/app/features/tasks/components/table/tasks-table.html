@@ -1,0 +1,112 @@
+<div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm mt-3">
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[48rem] border-collapse text-left text-sm">
+      <thead>
+        <tr
+          class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500"
+        >
+          <th class="px-4 py-3">Tarea</th>
+          <th class="px-4 py-3">Asignado</th>
+          <th class="px-4 py-3">Fechas</th>
+          <th class="px-4 py-3">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (tasks().length === 0) {
+          <tr app-empty-row [colspan]="4" message="No hay tareas"></tr>
+        } @else {
+          @for (task of tasks(); track task.id) {
+            <tr class="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/80">
+              <td class="px-4 py-3">
+                <div class="min-w-0 space-y-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="truncate font-medium text-ink">{{ task.name }}</p>
+                    @if (task.status) {
+                      <app-status-badge [status]="task.status" />
+                    }
+                  </div>
+                  @if (task.description) {
+                    <p class="truncate text-xs text-slate-500">
+                      {{ task.description }}
+                    </p>
+                  }
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                @if (task.assignedTo; as assigned) {
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700"
+                      aria-hidden="true"
+                    >
+                      {{ getInitials(assigned.name) }}
+                    </span>
+                    <div class="min-w-0">
+                      <p class="truncate font-medium text-ink">
+                        {{ assigned.name }}
+                      </p>
+                      <p class="truncate text-xs text-slate-500">
+                        {{ assigned.mail }}
+                      </p>
+                    </div>
+                  </div>
+                } @else {
+                  <span class="text-xs text-slate-400">—</span>
+                }
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-slate-600">
+                <div class="space-y-0.5 text-xs">
+                  <p>
+                    <span class="font-medium text-slate-500">Creado:</span>
+                    {{ task.createdDate | date: 'd MMM y' }}
+                  </p>
+                  @if (task.updatedDate) {
+                    <p>
+                      <span class="font-medium text-slate-500">Actualizado:</span>
+                      {{ task.updatedDate | date: 'd MMM y' }}
+                    </p>
+                  }
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                @if (nextStatus(task.status); as next) {
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    [class.bg-amber-600]="task.status === statuses.Pending"
+                    [class.hover:bg-amber-700]="task.status === statuses.Pending"
+                    [class.focus-visible:outline-amber-600]="
+                      task.status === statuses.Pending
+                    "
+                    [class.bg-emerald-600]="task.status === statuses.InProgress"
+                    [class.hover:bg-emerald-700]="
+                      task.status === statuses.InProgress
+                    "
+                    [class.focus-visible:outline-emerald-600]="
+                      task.status === statuses.InProgress
+                    "
+                    [disabled]="advancingId() === task.id"
+                    (click)="onAdvance(task)"
+                  >
+                    @if (advancingId() === task.id) {
+                      {{ actionLoadingLabel(task.status) }}
+                    } @else {
+                      @if (task.status === statuses.Pending) {
+                        <svg lucidePlay [size]="14" class="size-3.5"></svg>
+                      } @else {
+                        <svg lucideCircleCheck [size]="14" class="size-3.5"></svg>
+                      }
+                      {{ actionLabel(task.status) }}
+                    }
+                  </button>
+                } @else {
+                  <span class="text-xs text-slate-400">—</span>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

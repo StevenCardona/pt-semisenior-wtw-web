@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -12,29 +13,30 @@ import { LucideX } from '@lucide/angular';
 import { finalize } from 'rxjs';
 
 import { ToastService } from '@core/services/toast.service';
-import { USER_ROLES } from '@shared/constants/user-roles.constants';
 import { CURRENT_USER } from '@shared/constants/current-user';
+import { User } from '@features/users/models/user.model';
 
-import { UserFormValue } from '../../models/user-form.model';
-import { UsersApiService } from '../../services/users-api.service';
-import { UserForm } from '../forms/user-form';
+import { TaskFormValue } from '../../models/task-form.model';
+import { TasksApiService } from '../../services/tasks-api.service';
+import { TaskForm } from '../forms/task-form';
 
 @Component({
-  selector: 'app-create-user-modal',
+  selector: 'app-create-task-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UserForm, LucideX],
+  imports: [TaskForm, LucideX],
   host: {
     '(document:keydown.escape)': 'requestClose()',
   },
-  templateUrl: './create-user-modal.html',
+  templateUrl: './create-task-modal.html',
 })
-export class CreateUserModal {
-  private readonly usersApi = inject(UsersApiService);
+export class CreateTaskModal {
+  private readonly tasksApi = inject(TasksApiService);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly userForm = viewChild(UserForm);
+  private readonly taskForm = viewChild(TaskForm);
 
+  readonly users = input.required<User[]>();
   readonly closed = output<void>();
   readonly created = output<void>();
 
@@ -47,16 +49,17 @@ export class CreateUserModal {
     this.closed.emit();
   }
 
-  onFormSubmit(value: UserFormValue): void {
-    if (this.submitting()) {
+  onFormSubmit(value: TaskFormValue): void {
+    if (this.submitting() || value.userId == null) {
       return;
     }
 
     this.submitting.set(true);
-    this.usersApi
-      .createUser({
-        ...value,
-        rol: USER_ROLES.User,
+    this.tasksApi
+      .createTask({
+        name: value.name,
+        description: value.description.trim() || null,
+        userId: value.userId,
         createdBy: CURRENT_USER.id,
       })
       .pipe(
@@ -65,8 +68,8 @@ export class CreateUserModal {
       )
       .subscribe({
         next: () => {
-          this.toast.show('Usuario creado correctamente.', 'success');
-          this.userForm()?.reset();
+          this.toast.show('Tarea creada correctamente.', 'success');
+          this.taskForm()?.reset();
           this.created.emit();
         },
       });
