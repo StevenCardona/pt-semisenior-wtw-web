@@ -15,6 +15,11 @@ import { UsersSelector } from '@features/users/components/selector/users-selecto
 import { User } from '@features/users/models/user.model';
 import { UsersApiService } from '@features/users/services/users-api.service';
 import {
+  TASK_PRIORITIES,
+  TASK_PRIORITY_OPTIONS,
+  TaskPriority,
+} from '@shared/constants/task-priority.constants';
+import {
   TASK_STATUSES,
   TaskStatus,
 } from '@shared/constants/task-status.constants';
@@ -33,6 +38,7 @@ type TaskFilters = {
   userId: number | null;
   status: string;
   orderBy: string;
+  priority: string;
 };
 
 @Component({
@@ -60,10 +66,12 @@ export class TasksPage implements OnInit {
   readonly loading = signal(true);
   readonly createOpen = signal(false);
   readonly advancingId = signal<number | null>(null);
+  readonly updatingPriorityId = signal<number | null>(null);
 
   readonly filterUserId = signal<number | null>(null);
   readonly filterStatus = signal<string>('');
   readonly filterOrderBy = signal(DEFAULT_ORDER_BY);
+  readonly filterPriority = signal<string>('');
 
   readonly statusOptions = [
     { value: '', label: 'Todos' },
@@ -76,6 +84,11 @@ export class TasksPage implements OnInit {
     { value: 'createdDate', label: 'Fecha de creación' },
     { value: 'status', label: 'Estado' },
   ] as const;
+
+  readonly priorityOptions = [
+    { value: '', label: 'Todas' },
+    ...TASK_PRIORITY_OPTIONS,
+  ];
 
   ngOnInit(): void {
     this.loadUsers();
@@ -92,6 +105,7 @@ export class TasksPage implements OnInit {
       userId,
       status: userId == null ? '' : this.filterStatus(),
       orderBy: this.filterOrderBy(),
+      priority: this.filterPriority(),
     });
   }
 
@@ -101,6 +115,7 @@ export class TasksPage implements OnInit {
       userId: this.filterUserId(),
       status,
       orderBy: this.filterOrderBy(),
+      priority: this.filterPriority(),
     });
   }
 
@@ -111,6 +126,17 @@ export class TasksPage implements OnInit {
       userId: this.filterUserId(),
       status: this.filterStatus(),
       orderBy,
+      priority: this.filterPriority(),
+    });
+  }
+
+  onFilterPriorityChange(event: Event): void {
+    const priority = (event.target as HTMLSelectElement).value;
+    this.applyFilters({
+      userId: this.filterUserId(),
+      status: this.filterStatus(),
+      orderBy: this.filterOrderBy(),
+      priority,
     });
   }
 
@@ -137,6 +163,29 @@ export class TasksPage implements OnInit {
       });
   }
 
+  onPriorityChange(event: { id: number; priority: TaskPriority }): void {
+    if (this.updatingPriorityId() != null) {
+      return;
+    }
+
+    this.updatingPriorityId.set(event.id);
+    this.tasksApi
+      .updateAdditionalInfo(event.id, {
+        priority: event.priority,
+        updatedBy: CURRENT_USER.id,
+      })
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.updatingPriorityId.set(null)),
+      )
+      .subscribe({
+        next: () => {
+          this.toast.show('Prioridad actualizada correctamente.', 'success');
+          this.loadTasks();
+        },
+      });
+  }
+
   private syncFiltersFromUrl(): void {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -145,7 +194,8 @@ export class TasksPage implements OnInit {
         const missingKeys =
           !params.has('userId') ||
           !params.has('status') ||
-          !params.has('orderBy');
+          !params.has('orderBy') ||
+          !params.has('priority');
 
         if (missingKeys) {
           void this.router.navigate([], {
@@ -154,6 +204,7 @@ export class TasksPage implements OnInit {
               userId: filters.userId ?? '',
               status: filters.status,
               orderBy: filters.orderBy,
+              priority: filters.priority,
             },
             replaceUrl: true,
           });
@@ -163,6 +214,7 @@ export class TasksPage implements OnInit {
         this.filterUserId.set(filters.userId);
         this.filterStatus.set(filters.status);
         this.filterOrderBy.set(filters.orderBy);
+        this.filterPriority.set(filters.priority);
         this.loadTasks();
       });
   }
@@ -170,6 +222,8 @@ export class TasksPage implements OnInit {
   private readFiltersFromParams(params: ParamMap): TaskFilters {
     const userIdRaw = params.get('userId') ?? '';
     const parsedUserId = userIdRaw ? Number(userIdRaw) : null;
+    const priorityRaw = params.get('priority') ?? '';
+    const validPriorities = Object.values(TASK_PRIORITIES) as string[];
 
     return {
       userId:
@@ -178,6 +232,7 @@ export class TasksPage implements OnInit {
           : null,
       status: params.get('status') ?? '',
       orderBy: params.get('orderBy') || DEFAULT_ORDER_BY,
+      priority: validPriorities.includes(priorityRaw) ? priorityRaw : '',
     };
   }
 
@@ -190,6 +245,7 @@ export class TasksPage implements OnInit {
         userId: filters.userId ?? '',
         status,
         orderBy: filters.orderBy || DEFAULT_ORDER_BY,
+        priority: filters.priority || '',
       },
     });
   }
@@ -210,6 +266,7 @@ export class TasksPage implements OnInit {
     const userId = this.filterUserId();
     const orderBy = this.filterOrderBy();
     const status = this.filterStatus() as TaskStatus | '';
+    const priority = (this.filterPriority() || null) as TaskPriority | null;
 
     const request$ =
       userId != null
@@ -217,8 +274,9 @@ export class TasksPage implements OnInit {
             userId,
             status: status || null,
             orderBy,
+            priority,
           })
-        : this.tasksApi.getTasks({ orderBy });
+        : this.tasksApi.getTasks({ orderBy, priority });
 
     request$
       .pipe(

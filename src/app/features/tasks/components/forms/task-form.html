@@ -47,6 +47,49 @@
     }
   </div>
 
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="space-y-1.5">
+      <label for="task-priority" class="block text-sm font-medium text-slate-700">
+        Prioridad
+      </label>
+      <select
+        id="task-priority"
+        formControlName="priority"
+        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      >
+        @for (option of priorityOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="task-due-date" class="block text-sm font-medium text-slate-700">
+        Fecha estimada
+      </label>
+      <input
+        id="task-due-date"
+        type="date"
+        formControlName="dueDate"
+        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      />
+    </div>
+  </div>
+
+  <div class="space-y-1.5">
+    <label for="task-tags" class="block text-sm font-medium text-slate-700">
+      Etiquetas
+    </label>
+    <input
+      id="task-tags"
+      type="text"
+      formControlName="tags"
+      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      placeholder="sql, api, frontend (separadas por coma)"
+    />
+    <p class="text-xs text-slate-500">Opcional. Sepáralas por coma.</p>
+  </div>
+
   <div class="flex justify-end gap-2 pt-2">
     <button
       type="submit"

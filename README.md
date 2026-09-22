@@ -100,15 +100,16 @@ Cada feature trae su propia carpeta con `pages`, `components`, `models`, `servic
 - **Separación core / shared / features.** El esqueleto de la app no se mezcla con el dominio; lo compartido no se mete dentro de un solo feature.
 - **Servicios por feature.** Cada dominio habla con la API desde su propio servicio (`UsersApiService`, `TasksApiService`), sin un store global.
 - **Errores y feedback.** Un interceptor toma los mensajes de la API y el toast los muestra en pantalla.
-- **Filtros de tareas en la URL.** `userId`, `status` y `orderBy` viven en query params para que al recargar se mantenga la vista.
+- **Filtros de tareas en la URL.** `userId`, `status`, `orderBy` y `priority` viven en query params para que al recargar se mantenga la vista.
 - **Sin login en esta fase.** El actor demo es `CURRENT_USER` (sirve para `createdBy` / `updatedBy`).
+- **AdditionalInfo tipado.** El formulario envía prioridad / fecha / tags; la API lo persiste como JSON en SQL Server (`JSON_VALUE` / `JSON_MODIFY`).
 
 ---
 
 ## Qué puedes hacer hoy
 
 - **Usuarios:** listar y crear
-- **Tareas:** listar, filtrar por usuario/estado/orden, crear con asignado, avanzar estado (Iniciar / Completada)
+- **Tareas:** listar, filtrar por usuario/estado/prioridad/orden, crear con asignado y datos JSON (prioridad, fecha estimada, etiquetas), avanzar estado (Iniciar / Completada) y cambiar prioridad en la tabla
 
 ---
 

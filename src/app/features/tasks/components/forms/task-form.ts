@@ -13,6 +13,10 @@ import {
 
 import { UsersSelector } from '@features/users/components/selector/users-selector';
 import { User } from '@features/users/models/user.model';
+import {
+  TASK_PRIORITIES,
+  TASK_PRIORITY_OPTIONS,
+} from '@shared/constants/task-priority.constants';
 
 import {
   TASK_FORM_MAX_LENGTH_MESSAGES,
@@ -34,12 +38,19 @@ export class TaskForm {
   readonly submitting = input(false);
   readonly submitted = output<TaskFormValue>();
 
+  readonly priorityOptions = TASK_PRIORITY_OPTIONS;
+
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(2000)]],
     userId: this.fb.control<number | null>(null, {
       validators: [Validators.required],
     }),
+    priority: this.fb.nonNullable.control(TASK_PRIORITIES.Medium, {
+      validators: [Validators.required],
+    }),
+    dueDate: [''],
+    tags: [''],
   });
 
   onSubmit(): void {
@@ -61,6 +72,9 @@ export class TaskForm {
       name: '',
       description: '',
       userId: null,
+      priority: TASK_PRIORITIES.Medium,
+      dueDate: '',
+      tags: '',
     });
   }
 
