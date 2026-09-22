@@ -12,6 +12,7 @@ import {
   GetTasksByUserParams,
   GetTasksParams,
   Task,
+  UpdateTaskAdditionalInfoRequest,
 } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,9 @@ export class TasksApiService {
     let httpParams = new HttpParams();
     if (params.orderBy) {
       httpParams = httpParams.set('orderBy', params.orderBy);
+    }
+    if (params.priority) {
+      httpParams = httpParams.set('priority', params.priority);
     }
 
     return this.http
@@ -37,6 +41,9 @@ export class TasksApiService {
     }
     if (params.orderBy) {
       httpParams = httpParams.set('orderBy', params.orderBy);
+    }
+    if (params.priority) {
+      httpParams = httpParams.set('priority', params.priority);
     }
 
     return this.http
@@ -55,6 +62,15 @@ export class TasksApiService {
   changeStatus(id: number, body: ChangeTaskStatusRequest): Observable<Task> {
     return this.http
       .put<ApiResponse<Task>>(`${this.baseUrl}/${id}/status`, body)
+      .pipe(map((res) => res.data!));
+  }
+
+  updateAdditionalInfo(
+    id: number,
+    body: UpdateTaskAdditionalInfoRequest,
+  ): Observable<Task> {
+    return this.http
+      .patch<ApiResponse<Task>>(`${this.baseUrl}/${id}/additional-info`, body)
       .pipe(map((res) => res.data!));
   }
 }

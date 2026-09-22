@@ -17,6 +17,7 @@ import { CURRENT_USER } from '@shared/constants/current-user';
 import { User } from '@features/users/models/user.model';
 
 import { TaskFormValue } from '../../models/task-form.model';
+import { TaskAdditionalInfo } from '../../models/task.model';
 import { TasksApiService } from '../../services/tasks-api.service';
 import { TaskForm } from '../forms/task-form';
 
@@ -54,6 +55,18 @@ export class CreateTaskModal {
       return;
     }
 
+    const tags = value.tags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    const additionalInfo: TaskAdditionalInfo = {
+      priority: value.priority,
+      dueDate: value.dueDate.trim() || null,
+      tags: tags.length > 0 ? tags : null,
+      metadata: { source: 'ui' },
+    };
+
     this.submitting.set(true);
     this.tasksApi
       .createTask({
@@ -61,6 +74,7 @@ export class CreateTaskModal {
         description: value.description.trim() || null,
         userId: value.userId,
         createdBy: CURRENT_USER.id,
+        additionalInfo,
       })
       .pipe(
         takeUntilDestroyed(this.destroyRef),
