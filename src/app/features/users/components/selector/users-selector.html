@@ -1,0 +1,16 @@
+<div class="space-y-1.5">
+  <label for="users-selector" class="block text-sm font-medium text-slate-700">
+    Usuario
+  </label>
+  <select
+    id="users-selector"
+    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+    [value]="selectedId() ?? ''"
+    (change)="onChange($event)"
+  >
+    <option value="">Seleccionar usuario</option>
+    @for (user of users(); track user.id) {
+      <option [value]="user.id">{{ user.name }} — {{ user.mail }}</option>
+    }
+  </select>
+</div>

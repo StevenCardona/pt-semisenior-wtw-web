@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+import { Toast } from '@core/components/toast';
 import { LayoutSidebar } from '@core/layout/layout-sidebar';
 import { LayoutTopbar } from '@core/layout/layout-topbar';
 
 @Component({
   selector: 'app-layout-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LayoutSidebar, LayoutTopbar, RouterOutlet],
+  imports: [LayoutSidebar, LayoutTopbar, RouterOutlet, Toast],
   template: `
     <div class="flex h-dvh overflow-hidden bg-surface">
       <app-layout-sidebar [open]="sidebarOpen()" (close)="closeSidebar()" />
@@ -28,6 +29,8 @@ import { LayoutTopbar } from '@core/layout/layout-topbar';
         </main>
       </div>
     </div>
+
+    <app-toast />
   `,
 })
 export class LayoutShell {

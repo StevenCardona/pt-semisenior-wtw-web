@@ -32,11 +32,7 @@ type NavItem = {
         <ul class="space-y-1">
           @for (item of navItems; track item.route) {
             <li>
-              <app-menu-item
-                [label]="item.label"
-                [route]="item.route"
-                (pressed)="close.emit()"
-              >
+              <app-menu-item [label]="item.label" [route]="item.route" (pressed)="close.emit()">
                 @switch (item.icon) {
                   @case ('tasks') {
                     <svg
@@ -89,6 +85,6 @@ export class LayoutSidebar {
 
   readonly navItems: readonly NavItem[] = [
     { label: 'Tareas', route: '/tasks', icon: 'tasks' },
-    { label: 'Colaboradores', route: '/users', icon: 'users' },
+    { label: 'Usuarios', route: '/users', icon: 'users' },
   ];
 }

@@ -6,6 +6,15 @@ export const USER_ROLES = {
 
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
+export const ROLE_LABELS: Record<UserRole, string> = {
+  admin: 'Admin',
+  user: 'User',
+};
+
+export function roleLabel(rol: string): string {
+  return ROLE_LABELS[rol as UserRole] ?? 'User';
+}
+
 export const API_PATHS = {
   users: 'users',
   tasks: 'tasks',

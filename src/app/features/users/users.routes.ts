@@ -6,5 +6,6 @@ export const USERS_ROUTES: Routes = [
   {
     path: '',
     component: UsersPage,
+    title: 'Usuarios',
   },
 ];

@@ -1,0 +1,51 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="space-y-1.5">
+    <label for="user-name" class="block text-sm font-medium text-slate-700">
+      Nombre
+    </label>
+    <input
+      id="user-name"
+      type="text"
+      formControlName="name"
+      autocomplete="name"
+      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      [class.border-red-400]="fieldError('name')"
+      placeholder="Ej. Ana Pérez"
+    />
+    @if (fieldError('name'); as error) {
+      <p class="text-xs text-red-600">{{ error }}</p>
+    }
+  </div>
+
+  <div class="space-y-1.5">
+    <label for="user-mail" class="block text-sm font-medium text-slate-700">
+      Correo
+    </label>
+    <input
+      id="user-mail"
+      type="email"
+      formControlName="mail"
+      autocomplete="email"
+      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      [class.border-red-400]="fieldError('mail')"
+      placeholder="ana@ejemplo.com"
+    />
+    @if (fieldError('mail'); as error) {
+      <p class="text-xs text-red-600">{{ error }}</p>
+    }
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button
+      type="submit"
+      class="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+      [disabled]="submitting()"
+    >
+      @if (submitting()) {
+        Guardando…
+      } @else {
+        Crear usuario
+      }
+    </button>
+  </div>
+</form>
