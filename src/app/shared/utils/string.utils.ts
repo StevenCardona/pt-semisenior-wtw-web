@@ -1,4 +1,3 @@
-/** Obtiene las iniciales de un nombre (máx. 2 caracteres). */
 export function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) {

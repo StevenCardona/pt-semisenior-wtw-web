@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 
 function range(length: number): number[] {
-  return Array.from({ length }, (_, i) => i);
+  return Array.from({ length }, (_unused, index) => index);
 }
 
 @Component({
