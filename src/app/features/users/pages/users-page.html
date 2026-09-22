@@ -1,0 +1,21 @@
+<section class="space-y-6 p-6">
+  <app-page-header
+    title="Directorio de Usuarios"
+    subtitle="Equipo"
+    buttonLabel="Nuevo Usuario"
+    (buttonClick)="createOpen.set(true)"
+  />
+
+  @if (loading()) {
+    <app-table-skeleton [rows]="5" [columns]="3" />
+  } @else {
+    <app-users-table [users]="users()" />
+  }
+</section>
+
+@if (createOpen()) {
+  <app-create-user-modal
+    (closed)="createOpen.set(false)"
+    (created)="onUserCreated()"
+  />
+}
