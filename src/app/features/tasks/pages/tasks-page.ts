@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { ToastService } from '@core/services/toast.service';
@@ -28,6 +28,12 @@ import { Task } from '../models/task.model';
 import { TasksApiService } from '../services/tasks-api.service';
 
 const DEFAULT_ORDER_BY = 'createdDate';
+
+type TaskFilters = {
+  userId: number | null;
+  status: string;
+  orderBy: string;
+};
 
 @Component({
   selector: 'app-tasks-page',
@@ -82,8 +88,11 @@ export class TasksPage implements OnInit {
   }
 
   onFilterUserChange(userId: number | null): void {
-    const status = userId == null ? '' : this.filterStatus();
-    this.applyFilters({ userId, status, orderBy: this.filterOrderBy() });
+    this.applyFilters({
+      userId,
+      status: userId == null ? '' : this.filterStatus(),
+      orderBy: this.filterOrderBy(),
+    });
   }
 
   onFilterStatusChange(event: Event): void {
@@ -132,42 +141,47 @@ export class TasksPage implements OnInit {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const hasOrderBy = params.has('orderBy');
-        const hasUserId = params.has('userId');
-        const hasStatus = params.has('status');
+        const filters = this.readFiltersFromParams(params);
+        const missingKeys =
+          !params.has('userId') ||
+          !params.has('status') ||
+          !params.has('orderBy');
 
-        if (!hasOrderBy || !hasUserId || !hasStatus) {
+        if (missingKeys) {
           void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: {
-              userId: params.get('userId') ?? '',
-              status: params.get('status') ?? '',
-              orderBy: params.get('orderBy') || DEFAULT_ORDER_BY,
+              userId: filters.userId ?? '',
+              status: filters.status,
+              orderBy: filters.orderBy,
             },
             replaceUrl: true,
           });
           return;
         }
 
-        const userIdRaw = params.get('userId') ?? '';
-        const userId = userIdRaw ? Number(userIdRaw) : null;
-        const status = params.get('status') ?? '';
-        const orderBy = params.get('orderBy') || DEFAULT_ORDER_BY;
-
-        this.filterUserId.set(
-          userId != null && !Number.isNaN(userId) ? userId : null,
-        );
-        this.filterStatus.set(status);
-        this.filterOrderBy.set(orderBy);
+        this.filterUserId.set(filters.userId);
+        this.filterStatus.set(filters.status);
+        this.filterOrderBy.set(filters.orderBy);
         this.loadTasks();
       });
   }
 
-  private applyFilters(filters: {
-    userId: number | null;
-    status: string;
-    orderBy: string;
-  }): void {
+  private readFiltersFromParams(params: ParamMap): TaskFilters {
+    const userIdRaw = params.get('userId') ?? '';
+    const parsedUserId = userIdRaw ? Number(userIdRaw) : null;
+
+    return {
+      userId:
+        parsedUserId != null && !Number.isNaN(parsedUserId)
+          ? parsedUserId
+          : null,
+      status: params.get('status') ?? '',
+      orderBy: params.get('orderBy') || DEFAULT_ORDER_BY,
+    };
+  }
+
+  private applyFilters(filters: TaskFilters): void {
     const status = filters.userId == null ? '' : filters.status;
 
     void this.router.navigate([], {

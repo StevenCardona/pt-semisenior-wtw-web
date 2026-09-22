@@ -1,22 +1,19 @@
 # WTW Task Manager — Frontend
 
-App web de la prueba técnica: **WtWTaskManager**, un panel interno para gestionar tareas y colaboradores.
+App web de la prueba técnica: **WtWTaskManager**, panel interno para gestionar tareas y colaboradores.
 
-Stack: **Angular 21** (standalone), **Tailwind CSS v4** y **Lucide** para iconos. Habla con la API .NET del repo `wtw-task-manager-apis`.
+Stack: **Angular 21** (standalone) y **Tailwind CSS v4**. Consume la API .NET del repo `wtw-task-manager-apis`.
 
 ---
 
-## Antes de empezar
+## Pasos para ejecutar el proyecto
 
-Necesitas:
+### Requisitos
 
 1. [Node.js](https://nodejs.org/) LTS (v20 o superior) y npm
-2. La **API del backend** corriendo en `http://localhost:5065`  
-   (sigue el README de `wtw-task-manager-apis`)
+2. La API corriendo en `http://localhost:5065` (ver README de `wtw-task-manager-apis`)
 
----
-
-## Cómo levantarlo
+### Arranque
 
 ```powershell
 cd wtw-prueba-tecnica-web\wtw-task-manager-ui
@@ -26,13 +23,13 @@ npm start
 
 Abre **http://localhost:4200**.
 
-En desarrollo la app apunta a:
+En desarrollo la app usa:
 
 ```text
 http://localhost:5065/api
 ```
 
-El backend ya tiene CORS para `http://localhost:4200`.
+El backend ya permite CORS desde ese origen.
 
 ### Build de producción
 
@@ -40,115 +37,47 @@ El backend ya tiene CORS para `http://localhost:4200`.
 npm run build
 ```
 
-Usa `environment.ts`. Antes de desplegar, ajusta `apiUrl` a la URL real de la API.
+Antes de desplegar, ajusta `apiUrl` en `src/environments/environment.ts`.
 
 ---
 
-## Cómo está compuesto el proyecto
-
-La app vive en `src/app/` y se separa en tres zonas:
+## Cómo está compuesto
 
 ```text
 src/app/
-  core/                 # Cosas de una sola vez (esqueleto)
-    layout/             # Sidebar, topbar, shell + router-outlet
-    interceptors/       # Errores HTTP → toast
-    services/           # ToastService
-    components/         # Toast en pantalla
-  shared/               # Piezas reutilizables (sin dominio)
-    components/         # PageHeader, logo, sidebar-credit, badges…
-    constants/          # APP_NAME, nav, roles, estados, API paths
-    models/             # ApiResponse<T>
-    table-skeleton/     # Loading / fila vacía
-    utils/
+  core/        Layout, interceptor de errores, toast
+  shared/      Componentes y constants reutilizables
   features/
-    users/              # Módulo Usuarios
-    tasks/              # Módulo Tareas
-  app.routes.ts         # Rutas lazy: /tasks (inicio) y /users
+    users/     Listado y creación de usuarios
+    tasks/     Listado, filtros, creación y cambio de estado
 ```
 
-Cada feature sigue el mismo patrón:
-
-```text
-features/<nombre>/
-  pages/          # Pantalla “smart” (carga datos, abre modales)
-  components/     # Tabla, formulario, modal…
-  models/         # Tipos TypeScript alineados a la API
-  services/       # XxxApiService (HttpClient)
-  <nombre>.routes.ts
-```
-
-### ¿Dónde pongo código nuevo?
-
-| Carpeta | Pregunta rápida |
-|---------|-----------------|
-| `core` | ¿Es parte del esqueleto de la app? |
-| `shared` | ¿Lo usan (o podrían usar) varios features y no es de un solo dominio? |
-| `features/X` | ¿Es lógica o UI de ese dominio (users / tasks)? |
-
-No hay login ni guards: el usuario actual es un demo fijo (`CURRENT_USER`) que se usa en `createdBy` / `updatedBy`.
+Cada feature trae su propia carpeta con `pages`, `components`, `models`, `services` y rutas lazy.
 
 ---
 
-## Qué puedes hacer en la app
+## Decisiones técnicas
 
-### Usuarios (`/users`)
-
-- Ver el listado de colaboradores
-- Crear un usuario nuevo (nombre + correo)
-
-### Tareas (`/tasks` — ruta de inicio)
-
-- Ver el listado con asignado, estado y fechas
-- Filtrar por usuario, estado y orden; los filtros van en la **URL** (`userId`, `status`, `orderBy`) para que al recargar se mantengan
-- Crear una tarea y asignarla con el selector de usuarios
-- Avanzar el estado: **Iniciar** (`pending` → `inProgress`) o **Completada** (`inProgress` → `done`)
-
-Estados que ve el usuario: Pendiente, En progreso, Completada (la API sigue usando `pending` / `inProgress` / `done`).
+- **Arquitectura por features.** Cada módulo de negocio (usuarios, tareas) concentra su UI, modelos y llamadas HTTP. Así es más fácil manipularlo y extenderlo con el tiempo.
+- **Separación core / shared / features.** El esqueleto de la app no se mezcla con el dominio; lo compartido no se mete dentro de un solo feature.
+- **Servicios por feature.** Cada dominio habla con la API desde su propio servicio (`UsersApiService`, `TasksApiService`), sin un store global.
+- **Errores y feedback.** Un interceptor toma los mensajes de la API y el toast los muestra en pantalla.
+- **Filtros de tareas en la URL.** `userId`, `status` y `orderBy` viven en query params para que al recargar se mantenga la vista.
+- **Sin login en esta fase.** El actor demo es `CURRENT_USER` (sirve para `createdBy` / `updatedBy`).
 
 ---
 
-## Flujo de datos
+## Qué puedes hacer hoy
 
-```text
-Page (signals)
-  → XxxApiService (HttpClient)
-      → API REST
-  ↑
-errorInterceptor → ToastService → toast en pantalla
-```
-
-Las páginas cargan datos, pasan listas a tablas presentacionales y abren modales para crear. Los errores de la API se muestran con el toast; los éxitos (crear / cambiar estado) también.
+- **Usuarios:** listar y crear
+- **Tareas:** listar, filtrar por usuario/estado/orden, crear con asignado, avanzar estado (Iniciar / Completada)
 
 ---
 
-## Endpoints que consume
+## Qué quedó pendiente
 
-Base en desarrollo: `http://localhost:5065/api`
-
-### Usuarios
-
-| Método | Ruta | Uso |
-|--------|------|-----|
-| `GET` | `/users` | Listar |
-| `POST` | `/users` | Crear (`name`, `mail`, `rol`, `createdBy`) |
-
-### Tareas
-
-| Método | Ruta | Uso |
-|--------|------|-----|
-| `GET` | `/tasks?orderBy=` | Listar todas |
-| `GET` | `/tasks/user/{userId}?status=&orderBy=` | Listar por usuario (filtro de estado opcional) |
-| `POST` | `/tasks` | Crear (`name`, `description?`, `userId`, `createdBy`) |
-| `PUT` | `/tasks/{id}/status` | Cambiar estado (`status`, `updatedBy`) |
-
-Las respuestas de tarea incluyen el asignado como objeto `assignedTo` (`id`, `name`, `mail`, `rol`), no solo un `userId`.
-
----
-
-## Notas útiles
-
-- **Sin autenticación** en esta fase: cualquiera que llegue a la API/UI puede operar; `CURRENT_USER` simula al actor.
-- **Iconos**: `@lucide/angular` (reemplazan los SVG sueltos del layout y acciones).
-- **Estilos**: Tailwind v4 con PostCSS (`@import 'tailwindcss'`).
-- **Contratos**: camelCase alineado a la API (`mail`, `rol`, `createdBy`, `assignedTo`, etc.).
+- Usuarios: editar, eliminar, filtros, orden, paginación y buscador
+- Tareas: eliminar y buscador por nombre o descripción
+- Autenticación real (JWT o MFA): que solo quienes entren autenticados usen el panel
+- Que un usuario con rol `user` vea solo lo que tiene asignado
+- Estándares de auth más sólidos (hoy el “usuario actual” es una constante de demo)

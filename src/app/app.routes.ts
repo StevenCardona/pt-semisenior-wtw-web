@@ -15,12 +15,16 @@ export const routes: Routes = [
       {
         path: 'tasks',
         loadChildren: () =>
-          import('./features/tasks/tasks.routes').then((m) => m.TASKS_ROUTES),
+          import('./features/tasks/tasks.routes').then(
+            (routesModule) => routesModule.TASKS_ROUTES,
+          ),
       },
       {
         path: 'users',
         loadChildren: () =>
-          import('./features/users/users.routes').then((m) => m.USERS_ROUTES),
+          import('./features/users/users.routes').then(
+            (routesModule) => routesModule.USERS_ROUTES,
+          ),
       },
     ],
   },
