@@ -1,0 +1,63 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="space-y-1.5">
+    <label for="task-name" class="block text-sm font-medium text-slate-700">
+      Título
+    </label>
+    <input
+      id="task-name"
+      type="text"
+      formControlName="name"
+      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      [class.border-red-400]="fieldError('name')"
+      placeholder="Ej. Revisar reporte"
+    />
+    @if (fieldError('name'); as error) {
+      <p class="text-xs text-red-600">{{ error }}</p>
+    }
+  </div>
+
+  <div class="space-y-1.5">
+    <label
+      for="task-description"
+      class="block text-sm font-medium text-slate-700"
+    >
+      Descripción
+    </label>
+    <textarea
+      id="task-description"
+      formControlName="description"
+      rows="3"
+      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      [class.border-red-400]="fieldError('description')"
+      placeholder="Detalle opcional"
+    ></textarea>
+    @if (fieldError('description'); as error) {
+      <p class="text-xs text-red-600">{{ error }}</p>
+    }
+  </div>
+
+  <div>
+    <app-users-selector
+      [users]="users()"
+      [selectedId]="form.controls.userId.value"
+      (selectionChange)="onUserChange($event)"
+    />
+    @if (fieldError('userId'); as error) {
+      <p class="mt-1.5 text-xs text-red-600">{{ error }}</p>
+    }
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button
+      type="submit"
+      class="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+      [disabled]="submitting()"
+    >
+      @if (submitting()) {
+        Guardando…
+      } @else {
+        Crear tarea
+      }
+    </button>
+  </div>
+</form>

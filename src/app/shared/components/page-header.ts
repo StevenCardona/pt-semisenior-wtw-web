@@ -4,10 +4,12 @@ import {
   input,
   output,
 } from '@angular/core';
+import { LucidePlus } from '@lucide/angular';
 
 @Component({
   selector: 'app-page-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [LucidePlus],
   template: `
     <header
       class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
@@ -28,17 +30,7 @@ import {
         class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         (click)="buttonClick.emit()"
       >
-        <svg
-          class="size-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          <path d="M12 5v14M5 12h14" />
-        </svg>
+        <svg lucidePlus [size]="16" class="size-4"></svg>
         {{ buttonLabel() }}
       </button>
     </header>

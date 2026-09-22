@@ -12,6 +12,7 @@ import {
 } from '@angular/forms';
 
 import {
+  USER_FORM_EMAIL_MESSAGE,
   USER_FORM_MAX_LENGTH_MESSAGES,
   USER_FORM_REQUIRED_MESSAGES,
   UserFormField,
@@ -65,7 +66,7 @@ export class UserForm {
     }
 
     if (control.errors['email']) {
-      return 'El correo no tiene un formato válido.';
+      return USER_FORM_EMAIL_MESSAGE;
     }
 
     if (control.errors['maxlength']) {

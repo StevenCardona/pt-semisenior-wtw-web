@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
-import { API_PATHS } from '@shared/constants/app.constants';
+import { API_PATHS } from '@shared/constants/api-paths.constants';
 import { ApiResponse } from '@shared/models/api-response.model';
 import { environment } from '../../../../environments/environment';
 

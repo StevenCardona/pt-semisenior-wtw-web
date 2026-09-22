@@ -5,7 +5,7 @@ import {
   input,
 } from '@angular/core';
 
-import { roleLabel, UserRole } from '@shared/constants/app.constants';
+import { roleLabel, UserRole } from '@shared/constants/user-roles.constants';
 
 @Component({
   selector: 'app-role-badge',

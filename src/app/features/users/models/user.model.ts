@@ -1,4 +1,4 @@
-import { UserRole } from '@shared/constants/app.constants';
+import { UserRole } from '@shared/constants/user-roles.constants';
 
 export interface User {
   id: number;
