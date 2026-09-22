@@ -6,14 +6,31 @@ Stack: **Angular 21** (standalone) y **Tailwind CSS v4**. Consume la API .NET de
 
 ---
 
+## URLs publicadas
+
+| Entorno | URL |
+|---------|-----|
+| **Frontend (Vercel)** | https://pt-semisenior-wtw-web.vercel.app |
+| **API (producción)** | https://wtw-task-manager-apis.runasp.net |
+
+En producción la app llama a:
+
+```text
+https://wtw-task-manager-apis.runasp.net/api
+```
+
+Configurado en `src/environments/environment.ts`.
+
+---
+
 ## Pasos para ejecutar el proyecto
 
 ### Requisitos
 
 1. [Node.js](https://nodejs.org/) LTS (v20 o superior) y npm
-2. La API corriendo en `http://localhost:5065` (ver README de `wtw-task-manager-apis`)
+2. La API corriendo en `http://localhost:5065` (ver README de `wtw-task-manager-apis`) — solo para desarrollo local
 
-### Arranque
+### Arranque (desarrollo)
 
 ```powershell
 cd wtw-prueba-tecnica-web\wtw-task-manager-ui
@@ -23,13 +40,20 @@ npm start
 
 Abre **http://localhost:4200**.
 
-En desarrollo la app usa:
+En desarrollo (`ng serve`) Angular reemplaza el environment por `environment.development.ts` y usa:
 
 ```text
 http://localhost:5065/api
 ```
 
-El backend ya permite CORS desde ese origen.
+El backend permite CORS desde ese origen (`http://localhost:4200`).
+
+### Environments
+
+| Archivo | Cuándo se usa | `apiUrl` |
+|---------|---------------|----------|
+| `environment.development.ts` | `ng serve` / build `development` | `http://localhost:5065/api` |
+| `environment.ts` | `npm run build` (producción, default) | `https://wtw-task-manager-apis.runasp.net/api` |
 
 ### Build de producción
 
@@ -37,7 +61,21 @@ El backend ya permite CORS desde ese origen.
 npm run build
 ```
 
-Antes de desplegar, ajusta `apiUrl` en `src/environments/environment.ts`.
+Salida típica: `dist/wtw-task-manager-ui/browser`.
+
+---
+
+## Deploy en Vercel
+
+1. **Publica primero la API** con CORS que incluya `https://pt-semisenior-wtw-web.vercel.app`.
+2. En Vercel, crea/conecta el proyecto con:
+   - **Root Directory:** `wtw-task-manager-ui` (o la carpeta donde está este `package.json`)
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist/wtw-task-manager-ui/browser`
+3. El archivo `vercel.json` de esta carpeta hace rewrite SPA (`/*` → `/index.html`) para que rutas como `/tasks` funcionen al recargar.
+4. Redeploy el front después de cualquier cambio en `environment.ts`.
+
+Orden: **API → Frontend**.
 
 ---
 
